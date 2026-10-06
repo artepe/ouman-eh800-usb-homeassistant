@@ -165,6 +165,24 @@ Keep known-good recovery files outside the live controller. During development, 
 
 The property restore is not a firmware flash. The controller's `FIRMWARE` command is intentionally not used.
 
+
+## Lovelace dashboard example
+
+A ready-to-paste Home Assistant Lovelace card for the L1 heating circuit is included here:
+
+`examples/lovelace-ouman-l1-dashboard.yaml`
+
+It provides:
+
+- live gauges for supply temperature, calculated target and valve position
+- direct adjustment of all five L1 heating-curve points
+- real-time L1 values
+- a 12-hour supply-temperature/target history graph
+
+Add a **Manual card** in a Home Assistant dashboard and paste the contents of the example YAML file into the card editor.
+
+The example uses the entity IDs produced by the current tested installation. Home Assistant can add suffixes such as `_2` when an object ID already exists, so verify the entity IDs on your own installation if a card shows an unavailable entity.
+
 ## Important
 
 Writing properties changes the live heating controller configuration. v0.1 exposes only high-confidence L1 controls mapped during hardware testing.
