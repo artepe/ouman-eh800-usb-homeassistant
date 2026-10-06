@@ -2,14 +2,14 @@ from __future__ import annotations
 from datetime import timedelta
 import voluptuous as vol
 from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity
-from homeassistant.const import CONF_NAME
+from homeassistant.helpers.entity import DeviceInfo
 import homeassistant.helpers.config_validation as cv
-from .const import DEFAULT_PORT
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, CoordinatorEntity
+from .const import DEFAULT_PORT, DOMAIN
 from .ouman import OumanUSB
 
 CONF_PORT = "port"
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
-    vol.Optional(CONF_NAME, default="Ouman EH-800"): cv.string,
     vol.Optional(CONF_PORT, default=DEFAULT_PORT): cv.string,
 })
 SCAN_INTERVAL = timedelta(seconds=15)
@@ -31,25 +31,48 @@ NAMES = {
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     hub = OumanUSB(config[CONF_PORT])
-    async_add_entities(
-        [OumanMeasurement(hub, i, NAMES.get(i, f"Measurement {i}")) for i in range(1, 29)],
-        True,
+
+    async def _update():
+        return await hass.async_add_executor_job(hub.measurements)
+
+    coordinator = DataUpdateCoordinator(
+        hass,
+        logger=__import__("logging").getLogger(__name__),
+        name="Ouman EH-800 measurements",
+        update_method=_update,
+        update_interval=SCAN_INTERVAL,
     )
+    await coordinator.async_config_entry_first_refresh()
+    async_add_entities([
+        OumanMeasurement(coordinator, i, NAMES.get(i, f"Measurement {i}"))
+        for i in range(1, 29)
+    ])
 
-class OumanMeasurement(SensorEntity):
-    _attr_should_poll = True
-
-    def __init__(self, hub, index, name):
-        self.hub = hub
+class OumanMeasurement(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator, index, name):
+        super().__init__(coordinator)
         self.index = index
         self._attr_name = f"Ouman {name}"
         self._attr_unique_id = f"ouman_eh800_measurement_{index}"
-        self._attr_native_value = None
-        self._attr_native_unit_of_measurement = None
 
-    async def async_update(self):
-        vals = await self.hass.async_add_executor_job(self.hub.measurements)
-        if len(vals) >= self.index:
-            value, unit = vals[self.index - 1]
-            self._attr_native_value = value
-            self._attr_native_unit_of_measurement = "°C" if unit.lower() == "c" else unit
+    @property
+    def device_info(self):
+        return DeviceInfo(
+            identifiers={(DOMAIN, "eh800_usb")},
+            name="Ouman EH-800B",
+            manufacturer="Ouman",
+            model="EH-800 / EH-800B",
+        )
+
+    @property
+    def native_value(self):
+        vals = self.coordinator.data or []
+        return vals[self.index - 1][0] if len(vals) >= self.index else None
+
+    @property
+    def native_unit_of_measurement(self):
+        vals = self.coordinator.data or []
+        if len(vals) < self.index:
+            return None
+        unit = vals[self.index - 1][1]
+        return "°C" if unit.lower() == "c" else unit
