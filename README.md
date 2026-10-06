@@ -8,6 +8,16 @@ Independent reverse-engineering project for local USB CDC communication with Oum
 
 Not affiliated with or endorsed by Ouman Oy.
 
+## Project status / significance
+
+This project provides **bidirectional local communication with an Ouman EH-800B over USB**: live data can be read from the controller and confirmed configuration properties can be written back to the physical controller.
+
+The standard EH-800B lacks the Ethernet interface used by many EH-800 integrations, so this project targets the B model directly through its USB CDC-ACM service interface.
+
+During hardware testing, property writes have been verified on the physical controller, a 269-property snapshot has been captured, and the same snapshot has been used for controller recovery.
+
+This may be the **first known Home Assistant EH-800B USB integration with confirmed read/write support**, but this is intentionally stated as "first known" rather than an absolute claim until prior implementations have been exhaustively ruled out.
+
 ## What works in v0.1.2
 
 - USB CDC serial connection (tested device VID:PID `eb03:0920`)
@@ -42,6 +52,8 @@ Restart Home Assistant after validating the configuration.
 This recovery procedure is being hardware-tested on an EH-800B during reverse engineering. During the current restore of a previously captured 269-property snapshot, the normal line between the five L1 heating-curve points returned on the physical EH-800 display while the restore was still in progress.
 
 ### Important safety notes
+
+> **WARNING — valve/PID tuning:** During development, changing the L1 valve/PID controller parameters was associated with abnormal valve/controller behaviour and a possible controller/valve-control crash. The exact cause has not yet been isolated. **Do not change the P/I/D valve-control parameters unless you understand the controller behaviour and have a known-good backup.** For normal use, leave the PID values at their known-good/original values. These parameters should be treated as experimental/unsafe until further hardware testing confirms otherwise.
 
 The restore writes live controller configuration. Use only a snapshot captured from the **same controller**.
 
@@ -186,6 +198,8 @@ The example uses the entity IDs produced by the current tested installation. Hom
 ## Important
 
 Writing properties changes the live heating controller configuration. v0.1 exposes only high-confidence L1 controls mapped during hardware testing.
+
+**Do not experiment with the valve/PID parameters (P-band, I-time, D-time) on a live heating system.** They are currently retained for reverse-engineering/testing purposes, but changing them may cause unstable or abnormal valve control. Keep a verified property snapshot before making configuration changes.
 
 Known service-shell commands include `MEASUREMENTS`, `LIST`, `TYPE`, `KEYECHO`, `OSINFO`, `DEVINFO`, `TIME`, `SET CLOCK`, `SET DATE`, `SET DAY`, `RENAME`, `FIRMWARE`, `PTESTER`, and `SET PROPERTY variable value`.
 
