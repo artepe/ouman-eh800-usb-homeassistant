@@ -1,0 +1,68 @@
+type: vertical-stack
+cards:
+  - type: markdown
+    content: |
+      # 🔥 Ouman EH-800B
+      ### L1 lämmityspiirin valvomo
+  - type: grid
+    columns: 2
+    square: false
+    cards:
+      - type: gauge
+        entity: sensor.ouman_l1_supply_water_temperature
+        name: Menovesi
+        min: 0
+        max: 100
+        needle: true
+      - type: gauge
+        entity: sensor.ouman_l1_calculated_supply_target
+        name: Menovesitavoite
+        min: 0
+        max: 100
+        needle: true
+      - type: gauge
+        entity: sensor.ouman_l1_valve_position
+        name: Venttiili
+        min: 0
+        max: 100
+        needle: true
+      - type: gauge
+        entity: sensor.ouman_l1_valve_calculated_position
+        name: Venttiilin tavoite
+        min: 0
+        max: 100
+        needle: true
+  - type: entities
+    title: 🔥 L1 lämmityskäyrä — SÄÄTÖ
+    show_header_toggle: false
+    entities:
+      - entity: number.ouman_l1_curve_20c
+        name: ❄️ -20 °C → menovesi
+      - entity: number.ouman_l1_curve_10c
+        name: ❄️ -10 °C → menovesi
+      - entity: number.ouman_l1_curve_0c
+        name: 🌡️ 0 °C → menovesi
+      - entity: number.ouman_l1_curve_10c_2
+        name: ☀️ +10 °C → menovesi
+      - entity: number.ouman_l1_curve_20c_2
+        name: ☀️ +20 °C → menovesi
+  - type: entities
+    title: 📊 Ouman reaaliajassa
+    show_header_toggle: false
+    entities:
+      - entity: sensor.ouman_l1_calculated_supply_target
+        name: Laskettu menovesi
+      - entity: sensor.ouman_l1_supply_water_temperature
+        name: Todellinen menovesi
+      - entity: sensor.ouman_l1_valve_calculated_position
+        name: Venttiilin ohjaus
+      - entity: sensor.ouman_l1_valve_position
+        name: Venttiilin asento
+  - type: history-graph
+    title: 📈 Menovesi — 12 h
+    hours_to_show: 12
+    entities:
+      - entity: sensor.ouman_l1_supply_water_temperature
+        name: Menovesi
+      - entity: sensor.ouman_l1_calculated_supply_target
+        name: Tavoite
