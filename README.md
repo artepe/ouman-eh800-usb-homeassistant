@@ -39,7 +39,7 @@ Restart Home Assistant after validating the configuration.
 
 ## Restoring a previously saved EH-800 property snapshot
 
-This procedure was hardware-tested on an EH-800B during reverse engineering. A restore of a previously captured 269-property snapshot restored the controller settings and also restored the normal line between the five L1 heating-curve points on the physical EH-800 display.
+This recovery procedure is being hardware-tested on an EH-800B during reverse engineering. During the current restore of a previously captured 269-property snapshot, the normal line between the five L1 heating-curve points returned on the physical EH-800 display while the restore was still in progress.
 
 ### Important safety notes
 
@@ -157,7 +157,7 @@ After the restore has finished, verify important settings directly from the EH-8
 - valve/motor operation
 - installation-specific relay, network and hybrid settings
 
-During the first hardware-tested recovery, the L1 curve line visibly returned before the complete 269-property restore had finished. The restore was still allowed to continue to completion.
+During the current hardware recovery, the L1 curve line visibly returned before the complete 269-property restore had finished. The restore was left running and should not be interrupted before the final `DONE` line.
 
 ### Keep recovery copies
 
