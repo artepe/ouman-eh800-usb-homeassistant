@@ -1,6 +1,8 @@
-# Ouman EH-800 USB → Home Assistant
+# Ouman EH-800 / EH-800B USB Protocol → Home Assistant
 
-Independent reverse-engineering project for local USB CDC communication with Ouman EH-800/EH-800B controllers.
+Independent reverse-engineering project for the **Ouman EH-800 and EH-800B USB protocol**, providing local USB CDC communication directly between the heating controller and Home Assistant.
+
+**Home Assistant reads the Ouman directly through the Raspberry Pi USB port** using a USB Mini-B cable — no Ethernet interface, Modbus gateway, cloud connection, or separate protocol converter is required.
 
 **Author:** Petteri Miikkael Arte  
 **Copyright © 2026 Petteri Miikkael Arte**  
@@ -10,9 +12,9 @@ Not affiliated with or endorsed by Ouman Oy.
 
 ## Project status / significance
 
-This project provides **bidirectional local communication with an Ouman EH-800B over USB**: live data can be read from the controller and confirmed configuration properties can be written back to the physical controller.
+This project implements the **USB service protocol used by the Ouman EH-800 / EH-800B family**. Home Assistant can communicate with the controller locally through the Raspberry Pi's USB port: live data can be read directly from the controller and confirmed configuration properties can be written back to the physical controller.
 
-The standard EH-800B lacks the Ethernet interface used by many EH-800 integrations, so this project targets the B model directly through its USB CDC-ACM service interface.
+Current hardware reverse-engineering and write testing has been performed on an **EH-800B**. The integration uses the controller's USB CDC-ACM service interface instead of the Ethernet interface used by conventional EH-800 network integrations.
 
 During hardware testing, property writes have been verified on the physical controller, a 269-property snapshot has been captured, and the same snapshot has been used for controller recovery.
 
