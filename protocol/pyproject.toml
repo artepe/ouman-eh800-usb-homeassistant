@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ouman-eh800-usb-protocol"
+version = "0.1.0"
+description = "Async serialx protocol transport for Ouman EH-800 / EH-800B USB"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = ["serialx>=0.1.0"]
+license = {text = "MIT"}
+authors = [{name = "Petteri Miikkael Arte"}]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
