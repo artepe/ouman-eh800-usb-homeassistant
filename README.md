@@ -201,58 +201,75 @@ The example uses the entity IDs produced by the current tested installation. Hom
 
 Writing properties changes the live heating controller configuration. v0.1 exposes only high-confidence L1 controls mapped during hardware testing.
 
-**Do not experiment with the valve/PID parameters (P-band, I-time, D-time) on a live heating system.** They are currently retained for reverse-engineering/testing purposes, but changing them may cause unstable or abnormal valve control. Keep a verified property snapshot before making configuration changes.
+**Do not experiment with valve/PID parameters (P-band, I-time, D-time) on a live heating system.** The review branch disables writes to PID properties 56/57/58 while retaining all other previously offered L1 Number controls. Manual valve position 92 still changes the real valve. Keep a verified property snapshot before making configuration changes.
 
 Known service-shell commands include `MEASUREMENTS`, `LIST`, `TYPE`, `KEYECHO`, `OSINFO`, `DEVINFO`, `TIME`, `SET CLOCK`, `SET DATE`, `SET DAY`, `RENAME`, `FIRMWARE`, `PTESTER`, and `SET PROPERTY variable value`.
 
 The `FIRMWARE` path is intentionally not implemented.
 
 
-## Experimental non-breaking 0.2.0 UI setup (review branch only)
+## Development v0.2.1: writable L1 controls with read-only PID (draft PR)
 
-**Do not install this branch over a working production installation yet.**
-This is an opt-in development implementation of Markus98's recommendations.
-The original `sensor:` and `number:` YAML platforms, 28 entity unique IDs,
-USB command timings, property-write behaviour, and integration domain
-(`ouman_eh800`) are intentionally retained without modification.
+**Do not install this branch directly on your live heating controller yet.**
+The existing `main` branch and your installed v0.1.2 have not been modified.
+This is an opt-in review branch with hardware testing outstanding.
 
-### New optional features
-- HA Settings → Devices & services → Add integration → Ouman EH-800 USB.
-- Home Assistant USB serial-port selector and USB identification (EB03:0920).
-- Manual `socket://` port strings and proxy transports recognised by
-  Home Assistant's `serialx` installation.
-- An HA-independent Python USB protocol package in
-  `custom_components/ouman_eh800/usb_protocol/`, ready for separate packaging.
-- A persistent async connection guarded by `asyncio.Lock`, with a complete
-  28-measurement response required before exposing any values.
-- 15-second `DataUpdateCoordinator` for the new configuration-entry sensors.
-- Explicitly restricted write API in the library, **not exposed** by new UI
-  entities. PID IDs 56–58 and manual-valve ID 92 cannot be written through it.
-- Hardware-free unit tests, with fragmented `socket://` responses.
+### Existing YAML sensor / number setup
 
-### Existing YAML installations
-**If the current HA system works, leave the YAML exactly as it is.**
-Do not enable the UI entry for the same USB port while legacy YAML platforms
-are configured. These are alternative setups, not two simultaneous connections.
-Do not delete the existing YAML until you have a verified backup, have checked
-the new 28 readings on the physical controller, and are ready to migrate.
-The new UI-created sensor IDs are independent of the existing YAML sensor IDs:
-dashboards are NOT automatically migrated. New UI entries currently do not
-offer Number entities; use the original known-working YAML for controls.
+- All 28 measurement sensors retain the existing unique IDs and polling.
+- **12 existing non-PID Number controls remain writable** using the original
+  serial transport and original `SET PROPERTY` path:
+  54 supply minimum, 55 supply maximum, 67/69/71/73/75 heating curve,
+  91 summer shutoff, 92 manual valve position, 126 maximum change rate,
+  127 supply setpoint and 134 fine adjustment.
+- PID properties **56 (P), 57 (I), 58 (D) are NO LONGER writable Numbers**.
+  They are represented by read-only
+  `Ouman L1 P/I/D ... (saved snapshot)` sensors when you have a prior backup
+  at `/config/ouman_properties.txt`.
+- These three sensors read the existing saved text backup **without making any
+  USB requests**. They are **not live** PID readings; the saved backup may
+  be older than the controller's present settings. If no backup exists,
+  their state remains unknown. The timestamp attribute reflects the
+  file modification time, not necessarily the original capture time.
+- Legacy Numbers still contain the **old default values on startup**, not
+  verified reads of live properties. Do not assume these reflect actual
+  controller settings until independently verified.
 
-### Remaining hardware acceptance tests
-1. Confirm this firmware emits **exactly 28**, complete, newline-terminated
-   measurement values on every poll. The current protocol does not advertise
-   a documented frame terminator; 28 readings is a tentative *fixed-count*
-   framing rule, not a proven universal model-independent rule.
-2. Test reconnection following USB unplug/replug and Linux suspend/restart.
-3. Test `socket://` with socat on a separate bench controller and verify
-   framing when bytes arrive in small, delayed packets.
-4. Validate `serialx` + USB and ESPHome serial-proxy compatibility on the
-   user's Home Assistant version before calling proxies supported.
-5. Check the previous 28 sensor values, entity IDs, heating-curve parameters,
-   and valve behaviour in the real environment.
+### Optional Home Assistant UI configuration
 
-The standalone library is **not published on PyPI**. Its packaging metadata
-is included for review and future release. Hardware testing and confirmation
-are prerequisites for production migration.
+This alternate setup supports:
+- the native USB port selector, EB03:0920 discovery, and serialx URLs;
+- 28 measurement sensors with one 15-second coordinator;
+- **the same 12 writable L1 Number entities**, with strict raw range/step
+  checks and confirmed per-property controller acknowledgements;
+- the same three **snapshot-only** PID sensors;
+- one persistent USB session, async lock and no blind write retries;
+- a stand-alone protocol package and fake-serial regression tests.
+
+New UI Number entities start with an **unknown value** until a successful
+write is acknowledged. We deliberately do not seed them from hardcoded
+defaults or a possibly stale file. The Ouman protocol still lacks a verified,
+side-effect-free live `GET PROPERTY` command; `SET PROPERTY` must never be
+used as a way to read existing values. Do not attempt to migrate dashboards
+assuming UI-created entity IDs will match those from YAML.
+
+**Never configure the YAML and new UI connection against the same USB
+port at the same time.** The UI path is optional, not required for keeping
+existing controls working. The current installation can remain on v0.1.2
+until real-hardware acceptance tests finish.
+
+### Physical acceptance before release
+1. Test each of the 12 supported writes and immediately verify the actual
+   controller menu value (especially valve manual position and limits).
+2. Test the five curve points both positive and negative outdoor temperatures;
+   verify the menu and calculated supply-target display change.
+3. Verify PID changes are impossible through both YAML and UI controls and
+   that snapshot sensors make **zero** serial commands.
+4. Confirm fragmented 28-reading replies, reconnect after USB unplug,
+   and `socket://` behaviour with the specific controller firmware.
+5. Confirm Home Assistant does not create duplicate device/entity IDs and
+   that the old dashboard still functions after upgrading.
+
+No attempt has been made to publish the Python library to PyPI, to install
+the integration into the user's live Home Assistant, or to claim the new
+transport has passed physical tests.
