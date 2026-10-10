@@ -23,13 +23,25 @@ PROPERTY_RE = re.compile(
     re.IGNORECASE,
 )
 
-# Only the documented physically-verified property is currently writeable.
-# The new config-entry path exposes no writes. Never restore property dumps here.
+# Mirrors legacy YAML Number controls, but explicitly excludes 56/57/58
+# (PID). The controller's acknowledgement is required before publishing a
+# successful change. These limits are reverse-engineered and not vendor-certified.
+# No bulk restore or unbounded write path is provided.
 SAFE_WRITABLE_RAW_RANGES = {
-    # This is the only write physically confirmed in the project README.
-    # Other values, even when documented, require additional bench testing.
-    67: (0, 1000),  # L1 heating curve at -20 C
+    54: (50, 950),    # L1 supply minimum (x10)
+    55: (50, 950),    # L1 supply maximum (x10)
+    67: (0, 1000),    # L1 -20 C heating curve (x10)
+    69: (0, 1000),    # L1 -10 C heating curve (x10)
+    71: (0, 1000),    # L1   0 C heating curve (x10)
+    73: (0, 1000),    # L1 +10 C heating curve (x10)
+    75: (0, 1000),    # L1 +20 C heating curve (x10)
+    91: (5, 95),      # Summer shutoff
+    92: (0, 100),     # Manual valve position; affects real valve
+    126: (1, 50),    # Maximum supply change rate
+    127: (0, 950),   # L1 supply setpoint (x10)
+    134: (-40, 40),  # Fine adjustment (x10)
 }
+
 MAX_RESPONSE_LINES = 128
 MAX_RESPONSE_BYTES = 16384
 
@@ -150,8 +162,8 @@ class AsyncOumanUSB:
     async def set_property(self, property_id: int, raw_value: int) -> PropertyReply:
         """Write only documented, range-checked properties; never retry writes.
 
-        This method is library-only for now. The new HA config-entry path exposes
-        sensors, not writable Number entities, until hardware tests are complete.
+        Used by the opt-in config-entry Number entities. A successful reply
+        confirms protocol acknowledgement, not independent physical actuation.
         """
         if type(property_id) is not int or type(raw_value) is not int:
             raise ValueError("Property ID and value must be integers")
