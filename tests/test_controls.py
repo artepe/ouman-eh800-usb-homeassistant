@@ -7,6 +7,7 @@ from pathlib import Path
 sys.path.insert(
     0, str(Path(__file__).resolve().parents[1] / "custom_components" / "ouman_eh800")
 )
+from usb_protocol.client import SAFE_WRITABLE_RAW_RANGES  # noqa: E402
 from control_definitions import (  # noqa: E402
     PID_IDS,
     PID_PROPS,
@@ -22,6 +23,7 @@ class ControlsTest(unittest.TestCase):
             54, 55, 67, 69, 71, 73, 75, 91, 92, 126, 127, 134,
         })
         self.assertEqual({p[0] for p in WRITABLE_PROPS} & PID_IDS, set())
+        self.assertEqual(SAFE_WRITABLE_RAW_RANGES, WRITABLE_RAW_RANGES)
 
     def test_pid_read_only_metadata(self):
         self.assertEqual({p[0] for p in PID_PROPS}, {56, 57, 58})
