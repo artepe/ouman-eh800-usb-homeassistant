@@ -23,21 +23,12 @@ PROPERTY_RE = re.compile(
     re.IGNORECASE,
 )
 
-# Conservative, explicitly checked writable controls; not exposed by the new
-# config-entry path. PID settings 56-58 and manual-valve position 92 are
-# intentionally not allowed. Never restore arbitrary property dumps here.
+# Only the documented physically-verified property is currently writeable.
+# The new config-entry path exposes no writes. Never restore property dumps here.
 SAFE_WRITABLE_RAW_RANGES = {
-    54: (50, 950),    # Supply minimum, 0.1 C
-    55: (50, 950),    # Supply maximum, 0.1 C
-    67: (0, 1000),    # Heating curve -20 C
-    69: (0, 1000),    # Heating curve -10 C
-    71: (0, 1000),    # Heating curve   0 C
-    73: (0, 1000),    # Heating curve +10 C
-    75: (0, 1000),    # Heating curve +20 C
-    91: (5, 95),      # Summer shutoff
-    126: (1, 50),    # Max supply change rate
-    127: (0, 950),   # Supply setpoint
-    134: (-40, 40),  # Fine adjustment
+    # This is the only write physically confirmed in the project README.
+    # Other values, even when documented, require additional bench testing.
+    67: (0, 1000),  # L1 heating curve at -20 C
 }
 MAX_RESPONSE_LINES = 128
 MAX_RESPONSE_BYTES = 16384
