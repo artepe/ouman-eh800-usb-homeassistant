@@ -1,9 +1,11 @@
 {
   "domain": "ouman_eh800",
-  "name": "Ouman EH-800 USB",
+  "name": "Ouman EH-800B / EH-800 USB",
   "version": "0.1.2",
-  "documentation": "https://github.com/artepe/ouman-eh800-usb-homeassistant",
-  "requirements": ["pyserial==3.5"],
+  "documentation": "https://github.com/artepe/ouman-eh800-B-usb-homeassistant",
+  "requirements": [
+    "pyserial==3.5"
+  ],
   "codeowners": [],
   "iot_class": "local_polling"
 }

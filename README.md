@@ -1,4 +1,4 @@
-# Ouman EH-800 / EH-800B USB Protocol → Home Assistant
+# Ouman EH-800B / EH-800 USB Home Assistant — open USB protocol
 
 Independent reverse-engineering project for the **Ouman EH-800 and EH-800B USB protocol**, providing local USB CDC communication directly between the heating controller and Home Assistant.
 
