@@ -10,6 +10,14 @@ Independent reverse-engineering project for the **Ouman EH-800 and EH-800B USB p
 
 Not affiliated with or endorsed by Ouman Oy.
 
+> **Project variants and research source (October 2026):** [stable v0.1.2 main](https://github.com/artepe/ouman-eh800-B-usb-homeassistant/tree/main) · [merged restore + safe controls v0.2.2 review branch](https://github.com/artepe/ouman-eh800-B-usb-homeassistant/tree/feat/usb-async-safe-config-20261010) · [developer USB console / unrestricted property research](https://github.com/artepe/ouman-eh800-B-usb-homeassistant/tree/developer/usb-unrestricted-lab).
+>
+> **Raw USB protocol:** [ASCII commands & HEX](https://github.com/artepe/ouman-eh800-B-usb-homeassistant/blob/feat/usb-async-safe-config-20261010/docs/USB_PROTOCOL_RESEARCH.md) · [standalone Python library](https://github.com/artepe/ouman-eh800-B-usb-homeassistant/blob/feat/usb-async-safe-config-20261010/docs/STANDALONE_LIBRARY.md) · [original USB research script](https://github.com/artepe/ouman-eh800-B-usb-homeassistant/blob/developer/usb-unrestricted-lab/research/eh800b_usb_tool_original.py) · [recovery](https://github.com/artepe/ouman-eh800-B-usb-homeassistant/blob/feat/usb-async-safe-config-20261010/docs/RESTORE_AND_BACKUPS.md).
+>
+> **Physical display refresh:** USB writes can take effect without immediately refreshing an already-open EH-800B menu. Press **ESC once**, then reopen the heating-curve settings. The P/I/D settings were linked to abnormal valve behaviour in one installation; production v0.2.2 blocks PID writes in the ordinary UI. Other USB-equipped Ouman models **may** share the protocol, but this is unverified.
+
+> **Note:** The main branch remains the original v0.1.2 Home Assistant integration. The locally developed recovery implementation, standalone protocol package and read-only PID configuration are in the v0.2.2 review branch; main has **not** been replaced with untested controller changes.
+
 ## Project status / significance
 
 This project implements the **USB service protocol used by the Ouman EH-800 / EH-800B family**. Home Assistant can communicate with the controller locally through the Raspberry Pi's USB port: live data can be read directly from the controller and confirmed configuration properties can be written back to the physical controller.
