@@ -75,6 +75,8 @@ class AsyncProtocolTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(ValueError):
             await client.set_property(56, 250)
         with self.assertRaises(ValueError):
+            await client.set_property(54, 140)
+        with self.assertRaises(ValueError):
             await client.set_property(67, 4000)
         self.assertEqual(writer.sent, [])
 
