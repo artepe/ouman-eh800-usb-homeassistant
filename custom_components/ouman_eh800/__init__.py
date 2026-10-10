@@ -16,11 +16,17 @@ from homeassistant.helpers.update_coordinator import (
 )
 
 from .const import DOMAIN
+from .restore import async_setup_restore
 from .usb_protocol import AsyncOumanUSB
 
 _LOGGER = logging.getLogger(__name__)
 PLATFORMS = (Platform.SENSOR, Platform.NUMBER)
 SCAN_INTERVAL = timedelta(seconds=15)
+
+
+async def async_setup(hass, config) -> bool:
+    """Retain the manual restore action used by existing YAML installations."""
+    return await async_setup_restore(hass, config)
 
 
 async def async_setup_entry(hass, entry) -> bool:
