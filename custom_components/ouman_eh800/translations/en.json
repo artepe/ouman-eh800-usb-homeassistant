@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Ouman EH-800 / EH-800B USB",
-        "description": "Read-only UI setup. Remove the legacy YAML sensor/number platforms before activating the same port here.",
+        "description": "Optional UI installation with 28 measurements and 12 writable L1 controls. PID values come from a saved snapshot only. Do not configure the same port using YAML at the same time.",
         "data": {
           "device": "Serial port or proxy URL"
         }
