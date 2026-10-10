@@ -6,6 +6,7 @@ from homeassistant.helpers.entity import DeviceInfo
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, CoordinatorEntity
 from .const import DEFAULT_PORT, DOMAIN
+from .control_definitions import PID_PROPS, load_property_snapshot
 from .ouman import OumanUSB
 
 CONF_PORT = "port"
@@ -43,10 +44,16 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         update_interval=SCAN_INTERVAL,
     )
     await coordinator.async_config_entry_first_refresh()
-    async_add_entities([
-        OumanMeasurement(coordinator, i, NAMES.get(i, f"Measurement {i}"))
-        for i in range(1, 29)
-    ])
+    async_add_entities(
+        [
+            OumanMeasurement(coordinator, i, NAMES.get(i, f"Measurement {i}"))
+            for i in range(1, 29)
+        ]
+        + [
+            OumanPIDSnapshotSensor(hass.config.path("ouman_properties.txt"), p)
+            for p in PID_PROPS
+        ]
+    )
 
 class OumanMeasurement(CoordinatorEntity, SensorEntity):
     def __init__(self, coordinator, index, name):
@@ -83,12 +90,20 @@ class OumanMeasurement(CoordinatorEntity, SensorEntity):
 async def async_setup_entry(hass, entry, async_add_entities):
     """Create read-only measurement entities from the serialx coordinator."""
     _, coordinator = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities([
-        OumanEntryMeasurement(
-            coordinator, i, NAMES.get(i, f"Measurement {i}"), entry.entry_id
-        )
-        for i in range(1, 29)
-    ])
+    async_add_entities(
+        [
+            OumanEntryMeasurement(
+                coordinator, i, NAMES.get(i, f"Measurement {i}"), entry.entry_id
+            )
+            for i in range(1, 29)
+        ]
+        + [
+            OumanPIDSnapshotSensor(
+                hass.config.path("ouman_properties.txt"), p, entry.entry_id
+            )
+            for p in PID_PROPS
+        ]
+    )
 
 
 class OumanEntryMeasurement(OumanMeasurement):
@@ -107,3 +122,75 @@ class OumanEntryMeasurement(OumanMeasurement):
             manufacturer="Ouman",
             model="EH-800 / EH-800B",
         )
+
+
+class OumanPIDSnapshotSensor(SensorEntity):
+    """Read a previously saved controller backup, NEVER the live PID register.
+
+    The EH-800 USB shell has no validated no-write GET PROPERTY command.
+    This entity is explicitly named and attributed as a stored snapshot.
+    """
+
+    _attr_should_poll = True
+
+    def __init__(self, snapshot_path, prop, entry_id=None):
+        self.snapshot_path = snapshot_path
+        self.pid, object_id, label, pmin, pmax, step, scale, initial = prop
+        self.scale = scale
+        self.entry_id = entry_id
+        self._attr_name = f"Ouman {label} (saved snapshot)"
+        if entry_id is None:
+            self._attr_unique_id = f"ouman_eh800_saved_pid_{self.pid}"
+        else:
+            self._attr_unique_id = f"ouman_eh800_{entry_id}_saved_pid_{self.pid}"
+        self._attr_native_value = None
+        self._attr_extra_state_attributes = {
+            "data_source": "saved_backup_file_not_live",
+            "source_file": "ouman_properties.txt",
+            "live": False,
+        }
+
+    @property
+    def device_info(self):
+        identifier = (
+            f"eh800_usb_{self.entry_id}" if self.entry_id else "eh800_usb"
+        )
+        return DeviceInfo(
+            identifiers={(DOMAIN, identifier)},
+            name="Ouman EH-800 / EH-800B USB",
+            manufacturer="Ouman",
+            model="EH-800 / EH-800B",
+        )
+
+    async def async_update(self):
+        """Load only from the saved file, without any USB command."""
+        from datetime import datetime, timezone
+        from pathlib import Path
+
+        def _read():
+            path = Path(self.snapshot_path)
+            values = load_property_snapshot(path)
+            return values.get(self.pid), (
+                datetime.fromtimestamp(
+                    path.stat().st_mtime, timezone.utc
+                ).isoformat() if path.is_file() else None
+            )
+
+        try:
+            raw, file_modified = await self.hass.async_add_executor_job(_read)
+        except (OSError, ValueError) as err:
+            raw = file_modified = None
+            self._attr_extra_state_attributes = {
+                "data_source": "saved_backup_file_not_live",
+                "source_file": "ouman_properties.txt",
+                "live": False,
+                "read_error": str(err),
+            }
+        else:
+            self._attr_extra_state_attributes = {
+                "data_source": "saved_backup_file_not_live",
+                "source_file": "ouman_properties.txt",
+                "live": False,
+                "file_modified_utc": file_modified,
+            }
+        self._attr_native_value = raw / self.scale if raw is not None else None
