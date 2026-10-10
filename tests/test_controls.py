@@ -31,10 +31,10 @@ class ControlsTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "ouman_properties.txt"
             path.write_text(
-                "PROPERTY(56):'L1_SAATIMEN_P_ALUE'(2-600) = 250\\n"
-                "PROPERTY(57):'L1_SAATIMEN_I_AIKA'(5-300) = 50\\n"
-                "PROPERTY(58):'L1_SAATIMEN_D_AIKA'(0-100) = 0\\n"
-                "PROPERTY(134):'L1_HIENOSAATO_VESI'(0-100) = 65516\\n"
+                "PROPERTY(56):'L1_SAATIMEN_P_ALUE'(2-600) = 250\n"
+                "PROPERTY(57):'L1_SAATIMEN_I_AIKA'(5-300) = 50\n"
+                "PROPERTY(58):'L1_SAATIMEN_D_AIKA'(0-100) = 0\n"
+                "PROPERTY(134):'L1_HIENOSAATO_VESI'(0-100) = 65516\n"
             )
             self.assertEqual(
                 load_property_snapshot(path), {
