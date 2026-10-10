@@ -13,7 +13,7 @@ CONF_PORT = "port"
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_PORT, default=DEFAULT_PORT): cv.string,
 })
-SCAN_INTERVAL = timedelta(seconds=15)
+SCAN_INTERVAL = timedelta(seconds=1)  # Preserve tested user's legacy YAML polling
 
 NAMES = {
     1: "L1 calculated supply target",
