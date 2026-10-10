@@ -103,7 +103,7 @@ class AsyncProtocolTests(unittest.IsolatedAsyncioTestCase):
             with self.subTest(property=pid):
                 wire = raw & 0xFFFF
                 factory, writer = transport([
-                    f"PROPERTY({pid}):'TEST'(0-1000) = {wire}\\r\\n".encode()
+                    f"PROPERTY({pid}):'TEST'(0-1000) = {wire}\r\n".encode()
                 ])
                 client = AsyncOumanUSB(
                     "socket://127.0.0.1:4001", connection_factory=factory
@@ -112,13 +112,13 @@ class AsyncProtocolTests(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(response.property_id, pid)
                 self.assertEqual(response.raw_value, wire)
                 self.assertEqual(writer.sent, [
-                    f"SET PROPERTY {pid} {wire}\\n".encode()
+                    f"SET PROPERTY {pid} {wire}\n".encode()
                 ])
                 await client.disconnect()
 
     async def test_mismatched_write_reply_is_not_accepted(self):
         factory, writer = transport([
-            b"PROPERTY(69):'WRONG'(0-1000) = 910\\r\\n"
+            b"PROPERTY(69):'WRONG'(0-1000) = 910\r\n"
         ])
         client = AsyncOumanUSB(
             "socket://127.0.0.1:4001", connection_factory=factory
