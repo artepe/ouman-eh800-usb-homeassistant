@@ -1,6 +1,6 @@
 """Ouman EH-800 / EH-800B USB Home Assistant integration.
 
-Existing YAML sensor/number platforms are intentionally unchanged.
+Existing YAML sensor/number platforms remain supported; only PID Number writes are disabled.
 The optional config-entry path uses the isolated async protocol client.
 """
 from __future__ import annotations
@@ -19,12 +19,12 @@ from .const import DOMAIN
 from .usb_protocol import AsyncOumanUSB
 
 _LOGGER = logging.getLogger(__name__)
-PLATFORMS = (Platform.SENSOR,)
+PLATFORMS = (Platform.SENSOR, Platform.NUMBER)
 SCAN_INTERVAL = timedelta(seconds=15)
 
 
 async def async_setup_entry(hass, entry) -> bool:
-    """Set up a NEW opt-in, read-only UI configuration entry."""
+    """Set up opt-in UI entry with readings and non-PID controls."""
     port = entry.data[CONF_DEVICE]
     client = AsyncOumanUSB(port)
 
