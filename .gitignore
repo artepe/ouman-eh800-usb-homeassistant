@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+# Never commit device-specific controller captures or firmware
+ouman_properties.txt
+objects.dat
+*.bin
+*raw*capture*.json
+*raw*capture*.jsonl
+*.pcap
+*.pcapng
+*.tgz
+*.tar.gz
