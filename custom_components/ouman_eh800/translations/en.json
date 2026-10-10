@@ -1,0 +1,23 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Ouman EH-800 / EH-800B USB",
+        "description": "Read-only UI setup. Remove the legacy YAML sensor/number platforms before activating the same port here.",
+        "data": {
+          "device": "Serial port or proxy URL"
+        }
+      },
+      "usb_confirm": {
+        "title": "Ouman USB device detected",
+        "description": "Confirm connection to {port}. If this device is already configured using YAML, do not add it again."
+      }
+    },
+    "error": {
+      "cannot_connect": "Unable to read 28 measurements from the controller. Check the USB connection and ensure no other integration is using this port."
+    },
+    "abort": {
+      "already_configured": "This serial port is already configured."
+    }
+  }
+}

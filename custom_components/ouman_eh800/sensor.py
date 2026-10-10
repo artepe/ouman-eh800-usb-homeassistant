@@ -76,3 +76,34 @@ class OumanMeasurement(CoordinatorEntity, SensorEntity):
             return None
         unit = vals[self.index - 1][1]
         return "°C" if unit.lower() == "c" else unit
+
+
+# The optional UI flow uses a separate async coordinator. The original
+# YAML async_setup_platform above is preserved byte-for-byte.
+async def async_setup_entry(hass, entry, async_add_entities):
+    """Create read-only measurement entities from the serialx coordinator."""
+    _, coordinator = hass.data[DOMAIN][entry.entry_id]
+    async_add_entities([
+        OumanEntryMeasurement(
+            coordinator, i, NAMES.get(i, f"Measurement {i}"), entry.entry_id
+        )
+        for i in range(1, 29)
+    ])
+
+
+class OumanEntryMeasurement(OumanMeasurement):
+    """Entry-specific IDs avoid collisions with the legacy YAML entities."""
+
+    def __init__(self, coordinator, index, name, entry_id):
+        super().__init__(coordinator, index, name)
+        self._entry_id = entry_id
+        self._attr_unique_id = f"ouman_eh800_{entry_id}_measurement_{index}"
+
+    @property
+    def device_info(self):
+        return DeviceInfo(
+            identifiers={(DOMAIN, f"eh800_usb_{self._entry_id}")},
+            name="Ouman EH-800 / EH-800B USB",
+            manufacturer="Ouman",
+            model="EH-800 / EH-800B",
+        )

@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ouman-eh800-usb-protocol"
+version = "0.1.0"
+description = "Independent async Ouman EH-800/EH-800B USB serial protocol client"
+readme = "docs/protocol.md"
+requires-python = ">=3.11"
+dependencies = ["serialx>=1.8.2,<2"]
+license = {text = "MIT"}
+
+[tool.setuptools]
+packages = ["ouman_eh800_usb_protocol"]
+package-dir = {ouman_eh800_usb_protocol = "custom_components/ouman_eh800/usb_protocol"}

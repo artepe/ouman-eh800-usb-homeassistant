@@ -206,3 +206,53 @@ Writing properties changes the live heating controller configuration. v0.1 expos
 Known service-shell commands include `MEASUREMENTS`, `LIST`, `TYPE`, `KEYECHO`, `OSINFO`, `DEVINFO`, `TIME`, `SET CLOCK`, `SET DATE`, `SET DAY`, `RENAME`, `FIRMWARE`, `PTESTER`, and `SET PROPERTY variable value`.
 
 The `FIRMWARE` path is intentionally not implemented.
+
+
+## Experimental non-breaking 0.2.0 UI setup (review branch only)
+
+**Do not install this branch over a working production installation yet.**
+This is an opt-in development implementation of Markus98's recommendations.
+The original `sensor:` and `number:` YAML platforms, 28 entity unique IDs,
+USB command timings, property-write behaviour, and integration domain
+(`ouman_eh800`) are intentionally retained without modification.
+
+### New optional features
+- HA Settings → Devices & services → Add integration → Ouman EH-800 USB.
+- Home Assistant USB serial-port selector and USB identification (EB03:0920).
+- Manual `socket://` port strings and proxy transports recognised by
+  Home Assistant's `serialx` installation.
+- An HA-independent Python USB protocol package in
+  `custom_components/ouman_eh800/usb_protocol/`, ready for separate packaging.
+- A persistent async connection guarded by `asyncio.Lock`, with a complete
+  28-measurement response required before exposing any values.
+- 15-second `DataUpdateCoordinator` for the new configuration-entry sensors.
+- Explicitly restricted write API in the library, **not exposed** by new UI
+  entities. PID IDs 56–58 and manual-valve ID 92 cannot be written through it.
+- Hardware-free unit tests, with fragmented `socket://` responses.
+
+### Existing YAML installations
+**If the current HA system works, leave the YAML exactly as it is.**
+Do not enable the UI entry for the same USB port while legacy YAML platforms
+are configured. These are alternative setups, not two simultaneous connections.
+Do not delete the existing YAML until you have a verified backup, have checked
+the new 28 readings on the physical controller, and are ready to migrate.
+The new UI-created sensor IDs are independent of the existing YAML sensor IDs:
+dashboards are NOT automatically migrated. New UI entries currently do not
+offer Number entities; use the original known-working YAML for controls.
+
+### Remaining hardware acceptance tests
+1. Confirm this firmware emits **exactly 28**, complete, newline-terminated
+   measurement values on every poll. The current protocol does not advertise
+   a documented frame terminator; 28 readings is a tentative *fixed-count*
+   framing rule, not a proven universal model-independent rule.
+2. Test reconnection following USB unplug/replug and Linux suspend/restart.
+3. Test `socket://` with socat on a separate bench controller and verify
+   framing when bytes arrive in small, delayed packets.
+4. Validate `serialx` + USB and ESPHome serial-proxy compatibility on the
+   user's Home Assistant version before calling proxies supported.
+5. Check the previous 28 sensor values, entity IDs, heating-curve parameters,
+   and valve behaviour in the real environment.
+
+The standalone library is **not published on PyPI**. Its packaging metadata
+is included for review and future release. Hardware testing and confirmation
+are prerequisites for production migration.

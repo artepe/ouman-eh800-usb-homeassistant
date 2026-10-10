@@ -1,0 +1,23 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Ouman EH-800 / EH-800B USB",
+        "description": "Uusi käyttöliittymäasennus on vain lukua varten. Poista saman portin vanha YAML sensor/number -määritys ennen käyttöönottoa.",
+        "data": {
+          "device": "Sarjaportti tai välityspalvelimen osoite"
+        }
+      },
+      "usb_confirm": {
+        "title": "Ouman USB -laite löydetty",
+        "description": "Vahvista yhteys porttiin {port}. Jos käytät laitetta jo YAML-määrityksellä, älä lisää sitä uudelleen."
+      }
+    },
+    "error": {
+      "cannot_connect": "Laitteelta ei saatu 28 mittausarvoa. Tarkista USB-yhteys ja ettei portti ole toisessa käytössä."
+    },
+    "abort": {
+      "already_configured": "Tämä sarjaportti on jo määritetty."
+    }
+  }
+}
