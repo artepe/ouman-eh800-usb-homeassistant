@@ -1,8 +1,8 @@
 {
   "domain": "ouman_eh800",
-  "name": "Ouman EH-800 USB",
-  "version": "0.2.1",
-  "documentation": "https://github.com/artepe/ouman-eh800-usb-homeassistant",
+  "name": "Ouman EH-800B / EH-800 USB",
+  "version": "0.2.2",
+  "documentation": "https://github.com/artepe/ouman-eh800-B-usb-homeassistant",
   "config_flow": true,
   "dependencies": [
     "usb"
