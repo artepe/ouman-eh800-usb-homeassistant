@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Ouman EH-800 / EH-800B USB",
-        "description": "Uusi käyttöliittymäasennus on vain lukua varten. Poista saman portin vanha YAML sensor/number -määritys ennen käyttöönottoa.",
+        "description": "Uusi vaihtoehtoinen asennus sisältää 28 mittausta ja 12 kirjoitettavaa L1-säätöä. PID-arvot luetaan vain tallennetusta varmuuskopiosta. Älä käytä samaa porttia samanaikaisesti YAML-asennuksen kanssa.",
         "data": {
           "device": "Sarjaportti tai välityspalvelimen osoite"
         }
