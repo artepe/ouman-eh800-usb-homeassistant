@@ -7,9 +7,9 @@ import sys
 import unittest
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "custom_components"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "custom_components" / "ouman_eh800"))
 
-from ouman_eh800.usb_protocol import AsyncOumanUSB, OumanProtocolError  # noqa: E402
+from usb_protocol import AsyncOumanUSB, OumanProtocolError  # noqa: E402
 
 
 class FakeWriter:
