@@ -6,7 +6,7 @@ It lives in `custom_components/ouman_eh800/usb_protocol`, with
 and has not been published on PyPI.
 
 ```bash
-git clone https://github.com/artepe/ouman-eh800-usb-homeassistant.git
+git clone https://github.com/artepe/ouman-eh800-B-usb-homeassistant.git
 cd ouman-eh800-usb-homeassistant
 git checkout feat/usb-async-safe-config-20261010
 python3 -m venv .venv
