@@ -75,9 +75,10 @@ class AsyncProtocolTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(ValueError):
             await client.set_property(56, 250)
         with self.assertRaises(ValueError):
-            await client.set_property(54, 140)
-        with self.assertRaises(ValueError):
             await client.set_property(67, 4000)
+        for pid in (56, 57, 58):
+            with self.assertRaises(ValueError):
+                await client.set_property(pid, 20)
         self.assertEqual(writer.sent, [])
 
     async def test_safe_property_write_requires_matching_ack(self):
@@ -90,6 +91,42 @@ class AsyncProtocolTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(reply.raw_value, 910)
         self.assertEqual(writer.sent, [b"SET PROPERTY 67 910\n"])
         await client.disconnect()
+
+
+    async def test_all_non_pid_properties_are_writable_with_matching_ack(self):
+        allowed = {
+            54: 140, 55: 890, 67: 900, 69: 700, 71: 550,
+            73: 490, 75: 180, 91: 24, 92: 81, 126: 40,
+            127: 150, 134: -20,
+        }
+        for pid, raw in allowed.items():
+            with self.subTest(property=pid):
+                wire = raw & 0xFFFF
+                factory, writer = transport([
+                    f"PROPERTY({pid}):'TEST'(0-1000) = {wire}\\r\\n".encode()
+                ])
+                client = AsyncOumanUSB(
+                    "socket://127.0.0.1:4001", connection_factory=factory
+                )
+                response = await client.set_property(pid, raw)
+                self.assertEqual(response.property_id, pid)
+                self.assertEqual(response.raw_value, wire)
+                self.assertEqual(writer.sent, [
+                    f"SET PROPERTY {pid} {wire}\\n".encode()
+                ])
+                await client.disconnect()
+
+    async def test_mismatched_write_reply_is_not_accepted(self):
+        factory, writer = transport([
+            b"PROPERTY(69):'WRONG'(0-1000) = 910\\r\\n"
+        ])
+        client = AsyncOumanUSB(
+            "socket://127.0.0.1:4001", connection_factory=factory
+        )
+        with self.assertRaises(OumanProtocolError):
+            await client.set_property(67, 910)
+        self.assertTrue(writer.closed)
+        self.assertEqual(len(writer.sent), 1)
 
 
 if __name__ == "__main__":
